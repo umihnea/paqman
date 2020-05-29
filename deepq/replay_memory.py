@@ -6,7 +6,7 @@ class ReplayMemory:
         self._states = np.empty((capacity, *state_shape), np.float32)
         self._next_states = np.empty((capacity, *state_shape), np.float32)
         self._actions = np.empty(capacity, np.uint8)
-        self._rewards = np.empty(capacity, np.int16)
+        self._rewards = np.empty(capacity, np.float32)
         self._dones = np.empty(capacity, np.bool)
         self.capacity = capacity
         self.size = 0

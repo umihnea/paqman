@@ -10,7 +10,7 @@ from plot.plot import get_timestamp
 
 class Agent:
     def __init__(self, gamma=0.99, epsilon=1.0, epsilon_decay=1e-5, epsilon_end=0.1, learning_rate=1e-4,
-                 memory_capacity=50_000, replace_every=None, action_space=Discrete(4), state_shape=(4, 84, 84)):
+                 memory_capacity=50_000, replace_every=1000, action_space=Discrete(4), state_shape=(4, 84, 84)):
         self.gamma = gamma
         self.epsilon = epsilon
         self.epsilon_end = epsilon_end
@@ -49,14 +49,14 @@ class Agent:
         self._replace_target_network()
 
         # Sample a mini-batch from the replay memory
-        states, actions, rewards, next_states, dones = self._sample_batch(batch_size)
+        states, actions, rewards, next_states, dones = self._batch_as_tensors(batch_size)
 
         q_pred = self.q(states)
         q_pred = q_pred[np.arange(batch_size), actions.tolist()]
 
         q_next = self.next_q(next_states)
         q_next = q_next.max(dim=1)
-        q_next = q_next.values
+        q_next = q_next[0]
 
         q_next[dones] = 0.0
 
@@ -77,11 +77,18 @@ class Agent:
         if self.learning_step % self.replace_every == 0:
             self.next_q.load_state_dict(self.q.state_dict())
 
-    def _sample_batch(self, batch_size):
+    def _batch_as_tensors(self, batch_size):
         """Sample the batch then convert from NumPy arrays to Torch tensors."""
-        arrays = self.replay_memory.sample(batch_size)
-        tensors = [torch.tensor(x).to(self.device) for x in arrays]
-        return tuple(tensors)
+        states, actions, rewards, next_states, dones = self.replay_memory.sample(batch_size)
+
+        t_states = torch.from_numpy(states).float().to(self.device)
+        t_next_states = torch.from_numpy(next_states).float().to(self.device)
+
+        t_actions = torch.from_numpy(actions).to(self.device)
+        t_rewards = torch.from_numpy(rewards).float().to(self.device)
+        t_dones = torch.from_numpy(dones).bool().to(self.device)
+
+        return t_states, t_actions, t_rewards, t_next_states, t_dones
 
     def _decay_epsilon(self):
         new_epsilon = self.epsilon - self.epsilon_decay

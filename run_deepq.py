@@ -2,6 +2,7 @@ import argparse
 import os
 
 import numpy as np
+import torch
 from gym import wrappers, logger
 
 from deepq.agent import Agent
@@ -40,6 +41,12 @@ if __name__ == '__main__':
             logger.error('Checkpoint file \'%s\' not found.', path_to_checkpoint)
         else:
             agent.load_checkpoint(path_to_checkpoint)
+
+    # Check CUDA
+    if torch.cuda.is_available():
+        logger.info('GPU is available!')
+    else:
+        logger.info('GPU cannot be acquired.')
 
     # Train
     num_episodes = int(args.episodes)

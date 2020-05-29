@@ -2,7 +2,6 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from gym import logger
 from torch.optim import RMSprop
 
 
@@ -15,16 +14,15 @@ class DeepQNetwork(nn.Module):
         self.conv3 = nn.Conv2d(64, 128, 3, stride=1)
 
         linear_in = self._calculate_conv_output_dims(input_shape)
-        logger.info("input (%d, %d, %d) => output %d", input_shape[0], input_shape[1], input_shape[2], linear_in)
 
         self.linear1 = nn.Linear(linear_in, 512)
         self.linear2 = nn.Linear(512, output_size)
 
-        self.loss = nn.MSELoss()
-        self.optimizer = RMSprop(self.parameters(), lr=learning_rate)
-
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         self.to(self.device)
+
+        self.loss = nn.MSELoss()
+        self.optimizer = RMSprop(self.parameters(), lr=learning_rate)
 
     def _calculate_conv_output_dims(self, input_dims):
         state = torch.zeros(1, *input_dims)

@@ -1,4 +1,5 @@
 import argparse
+import os
 
 import numpy as np
 from gym import wrappers, logger
@@ -7,10 +8,17 @@ from deepq.agent import Agent
 from plot.plot import plot_to_file
 from wrappers.wrappers import make_env
 
+DATA_ROOT = './data/deepq'
+PLOTS_DIR = '%s/plots' % DATA_ROOT
+CHECKPOINTS_DIR = '%s/checkpoints' % DATA_ROOT
+MONITOR_DIR = '%s/monitor' % DATA_ROOT
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=None)
-    parser.add_argument('--episodes', nargs='?', default='100', help='Number of games to play')
+    parser.add_argument('--episodes', nargs='?', default=100, help='Number of episodes to play for')
     parser.add_argument('--env', nargs='?', default='MsPacman-v4', help='The environment to run')
+    parser.add_argument('--batch', nargs='?', default=32, help='Batch size hyperparameter')
+    parser.add_argument('--checkpoint', nargs='?', default=None, help='Checkpoint file to reload training from')
     args = parser.parse_args()
 
     logger.set_level(logger.INFO)
@@ -18,8 +26,7 @@ if __name__ == '__main__':
     env = make_env(args.env)
 
     # Connect monitor
-    output_directory = './data/deepq-results'
-    env = wrappers.Monitor(env, directory=output_directory, force=True)
+    env = wrappers.Monitor(env, directory=MONITOR_DIR, force=True)
     env.seed(0)
 
     agent = Agent(
@@ -27,12 +34,21 @@ if __name__ == '__main__':
         state_shape=env.observation_space.shape,
     )
 
+    if args.checkpoint is not None:
+        path_to_checkpoint = '/'.join([CHECKPOINTS_DIR, args.checkpoint])
+        if not os.path.isfile(path_to_checkpoint):
+            logger.error('Checkpoint file \'%s\' not found.', path_to_checkpoint)
+        else:
+            agent.load_checkpoint(path_to_checkpoint)
+
     # Train
-    total_episodes = int(args.episodes) or 100
+    num_episodes = int(args.episodes)
+    batch_size = int(args.batch)
+    total_episodes = batch_size + num_episodes
 
     scores = []
     epsilons = []
-    batch_size = 11  # 32
+    top_score = 0.0
 
     for episode in range(total_episodes):
         score = 0
@@ -48,11 +64,6 @@ if __name__ == '__main__':
 
             score += reward
 
-            # Penalize for losing a life
-            # current_lives = info['ale.lives']
-            # if current_lives < lives:
-            #     reward = -100
-
             agent.store(observation, action, reward, next_observation, done)
 
             if episode >= batch_size:
@@ -62,13 +73,20 @@ if __name__ == '__main__':
 
         scores.append(score)
 
-        top_score = np.amax(scores)
+        # Update maximum and save checkpoint
+        current_max = np.amax(scores)
+        if top_score < current_max:
+            if episode > batch_size:
+                agent.save_checkpoint(CHECKPOINTS_DIR)
+
+            top_score = current_max
+
         mean_score = np.mean(scores)
         logger.info(
             '[Episode %d] Score: %d, Top score: %.2f, Avg. score: %.2f',
-            episode, score, top_score, mean_score
+            episode - batch_size, score, top_score, mean_score
         )
 
         epsilons.append(agent.epsilon)
 
-    plot_to_file(scores, epsilons, len(scores), './data/deepq-results')
+    plot_to_file(scores, epsilons, len(scores), PLOTS_DIR)

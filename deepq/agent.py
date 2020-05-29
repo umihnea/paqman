@@ -5,6 +5,7 @@ from gym.spaces import Discrete
 
 from deepq.network import DeepQNetwork
 from deepq.replay_memory import ReplayMemory
+from plot.plot import get_timestamp
 
 
 class Agent:
@@ -22,8 +23,8 @@ class Agent:
 
         self.replace_every = replace_every  # The rate at which we swap the two networks
 
-        self.steps = 0
-        self.learning_steps = 0
+        self.step = 0
+        self.learning_step = 0
 
         self.q = DeepQNetwork(learning_rate, state_shape, action_space.n)
         self.next_q = DeepQNetwork(learning_rate, state_shape, action_space.n)
@@ -65,7 +66,7 @@ class Agent:
         loss.backward()
         self.q.optimizer.step()
 
-        self.learning_steps += 1
+        self.learning_step += 1
         self._decay_epsilon()
 
     def _replace_target_network(self):
@@ -73,7 +74,7 @@ class Agent:
         if self.replace_every is None:
             return
 
-        if self.learning_steps % self.replace_every == 0:
+        if self.learning_step % self.replace_every == 0:
             self.next_q.load_state_dict(self.q.state_dict())
 
     def _sample_batch(self, batch_size):
@@ -90,3 +91,27 @@ class Agent:
 
     def store(self, observation, action, reward, next_observation, done):
         self.replay_memory.add_transition(observation, action, reward, next_observation, done)
+
+    def save_checkpoint(self, path):
+        path = '%s/checkpoint_from_%s.pyt' % (path, get_timestamp())
+        torch.save({
+            'learning_step': self.learning_step,
+            'q': self.q.state_dict(),
+            'next_q': self.next_q.state_dict(),
+            'optimizer': self.q.optimizer.state_dict(),
+            'epsilon': self.epsilon,
+        }, path)
+        logger.info('Saved checkpoint at %s.', path)
+
+    def load_checkpoint(self, path):
+        checkpoint = torch.load(path)
+        self.q.load_state_dict(checkpoint['q'])
+        self.next_q.load_state_dict(checkpoint['next_q'])
+        self.q.optimizer.load_state_dict(checkpoint['optimizer'])
+        self.epsilon = checkpoint['epsilon']
+        self.learning_step = checkpoint['learning_step']
+
+        logger.info('Loaded checkpoint from %s.', path)
+
+        self.q.train()
+        self.next_q.train()

@@ -11,23 +11,24 @@ from plot.plot import get_timestamp
 class Agent:
     def __init__(self, gamma=0.99, epsilon=1.0, epsilon_decay=1e-5, epsilon_end=0.1, learning_rate=1e-4,
                  memory_capacity=50_000, replace_every=1000, action_space=Discrete(4), state_shape=(4, 84, 84)):
-        self.gamma = gamma
-        self.epsilon = epsilon
-        self.epsilon_end = epsilon_end
-        self.epsilon_decay = epsilon_decay
-        self.learning_rate = learning_rate
+        self.gamma = float(gamma)
+        self.epsilon = float(epsilon)
+        self.epsilon_end = float(epsilon_end)
+        self.epsilon_decay = float(epsilon_decay)
+        self.learning_rate = float(learning_rate)
 
         self.action_space = action_space
 
-        self.replay_memory = ReplayMemory(memory_capacity, state_shape)
+        self.replay_memory = ReplayMemory(int(memory_capacity), state_shape)
 
-        self.replace_every = replace_every  # The rate at which we swap the two networks
+        # The rate at which we swap the two networks
+        self.replace_every = int(replace_every)
 
         self.step = 0
         self.learning_step = 0
 
-        self.q = DeepQNetwork(learning_rate, state_shape, action_space.n)
-        self.next_q = DeepQNetwork(learning_rate, state_shape, action_space.n)
+        self.q = DeepQNetwork(self.learning_rate, state_shape, action_space.n)
+        self.next_q = DeepQNetwork(self.learning_rate, state_shape, action_space.n)
         self.device = self.q.device
 
     def act(self, observation):

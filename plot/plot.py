@@ -7,8 +7,11 @@ def get_timestamp():
     return now.strftime('%d_%m_%Y_%H_%M_%S')
 
 
-def plot_to_file(scores, epsilons, total_episodes, output_directory):
-    x = list(range(total_episodes))
+def plot_scores(scores, epsilons, output_directory):
+    print(scores)
+    print(epsilons)
+
+    x = list(range(len(scores)))
     plt.subplot(1, 2, 1)
     plt.xlabel('Episode')
     plt.ylabel('Score')
@@ -21,3 +24,17 @@ def plot_to_file(scores, epsilons, total_episodes, output_directory):
 
     plt.tight_layout()
     plt.savefig(output_directory + '/score_plot_' + get_timestamp() + '.png')
+    plt.clf()
+
+
+def plot_ram(ram_values, output):
+    fig = plt.figure()
+    ax = plt.axes()
+
+    x = list(range(len(ram_values)))
+    ax.plot(x, ram_values, c='b')
+    plt.xlabel('Episode')
+    plt.ylabel('RAM Usage (bytes)')
+
+    fig.savefig(output + '/ram_usage_plot_' + get_timestamp() + '.png')
+    plt.clf()

@@ -5,11 +5,12 @@ import os
 import numpy as np
 import torch
 import yaml
+import psutil
 from gym import wrappers
 
 from deepq.agent import Agent
 from deepq.replay_memory import ReplayMemory
-from plot.plot import plot_to_file
+from plot.plot import plot_scores, plot_ram
 from wrappers.wrappers import make_env
 
 logging.basicConfig(
@@ -40,9 +41,24 @@ def run_episode(env, agent, current_episode, batch_size):
     return score, agent.epsilon
 
 
-def shutdown_training(scores, epsilons, plots_path, agent, checkpoints_path):
+def zip_everything():
+    logging.info('Compressing data.')
+    import shutil
+    logger = logging.getLogger('zip_everything')
+    shutil.make_archive('./results', 'gztar', '.', 'data', logger=logger)
+    logging.info('Compressing done.')
+
+
+def add_ram_usage(ram_values):
+    process = psutil.Process(os.getpid())
+    ram_values.append(process.memory_info().rss)  # in bytes
+
+
+def shutdown_training(scores, epsilons, plots_path, agent, checkpoints_path, ram_values):
     agent.save_checkpoint(checkpoints_path)
-    plot_to_file(scores, epsilons, len(scores), plots_path)
+    plot_scores(scores, epsilons, plots_path)
+    plot_ram(ram_values, plots_path)
+    zip_everything()
 
 
 def get_parser():
@@ -121,7 +137,8 @@ def main(conf_file):
 
     scores = []
     epsilons = []
-    top_score = 0.0
+    top_score = float('-inf')
+    ram_values = []
 
     checkpoint_every = conf['checkpoints']['every']
     checkpoint_path = conf['checkpoints']['path']
@@ -134,21 +151,27 @@ def main(conf_file):
             top_score = max(top_score, score)
 
             actual_episode = episode - batch_size  # de-offset episode
-            if score == top_score and actual_episode >= 0:  # checkpoint on new high score
+            if actual_episode > 0 and actual_episode % checkpoint_every == 0:
                 agent.save_checkpoint(checkpoint_path)
-            if actual_episode % checkpoint_every == 0:
-                agent.save_checkpoint(checkpoint_path)
+            # elif score == top_score and actual_episode >= 0:  # checkpoint on new high score
+            #     agent.save_checkpoint(checkpoint_path)
 
             logging.info(
                 '[Episode %d] Score: %d, Top score: %.2f, Avg. score: %.2f, Epsilon: %.3f',
                 episode - batch_size, score, top_score, mean_score, epsilon
             )
+
+            scores.append(score)
+            epsilons.append(epsilon)
+            add_ram_usage(ram_values)  # Track RAM usage
+
         except KeyboardInterrupt:
             logging.info('Gracefully shutting down...')
-            shutdown_training(scores, epsilons, conf['plots']['path'], agent, checkpoint_path)
+            shutdown_training(scores, epsilons, conf['plots']['path'], agent, checkpoint_path, ram_values)
 
     logging.info('Completed training.')
-    shutdown_training(scores, epsilons, conf['plots']['path'], agent, checkpoint_path)
+    shutdown_training(scores, epsilons, conf['plots']['path'], agent, checkpoint_path, ram_values)
+
 
 if __name__ == '__main__':
     args = get_parser().parse_args()

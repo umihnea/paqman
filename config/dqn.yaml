@@ -1,6 +1,6 @@
 training:
-  gym_id: Pong-v4
-  num_episodes: 2000
+  gym_id: Breakout-v4
+  num_episodes: 4000
 model:
   learning_rate: 1e-4
   gamma: 0.99
@@ -12,7 +12,7 @@ model:
   memory_gb: 3
 checkpoints:
   path: ../data/checkpoints/
-  every: 200
+  every: 500
   on_highscore: True
 logs:
   path: ../data/logs/

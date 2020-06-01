@@ -6,7 +6,6 @@ import numpy as np
 import torch
 import yaml
 import psutil
-from gym import wrappers
 
 from deepq.agent import Agent
 from deepq.replay_memory import ReplayMemory
@@ -112,7 +111,6 @@ def main(conf_file):
         logging.info('GPU cannot be acquired.')
 
     env = make_env(conf['training']['gym_id'])
-    env = wrappers.Monitor(env, directory=conf['monitor']['path'], force=True)
     env.seed(0)
 
     model = conf['model']

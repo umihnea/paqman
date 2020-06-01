@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import pandas as pd
 from datetime import datetime
 
 
@@ -8,19 +9,19 @@ def get_timestamp():
 
 
 def plot_scores(scores, epsilons, output_directory):
-    print(scores)
-    print(epsilons)
-
-    x = list(range(len(scores)))
     plt.subplot(1, 2, 1)
+
+    smoothing_window = 5
+    rewards_smoothed = pd.Series(scores).rolling(smoothing_window, min_periods=smoothing_window).mean()
+    plt.plot(rewards_smoothed)
+
     plt.xlabel('Episode')
     plt.ylabel('Score')
-    plt.scatter(x, scores, c='k')
 
     plt.subplot(1, 2, 2)
     plt.xlabel('Episode')
     plt.ylabel('Epsilon')
-    plt.plot(x, epsilons, c='g')
+    plt.plot(epsilons, c='g')
 
     plt.tight_layout()
     plt.savefig(output_directory + '/score_plot_' + get_timestamp() + '.png')
@@ -31,8 +32,7 @@ def plot_ram(ram_values, output):
     fig = plt.figure()
     ax = plt.axes()
 
-    x = list(range(len(ram_values)))
-    ax.plot(x, ram_values, c='b')
+    ax.plot(ram_values, c='b')
     plt.xlabel('Episode')
     plt.ylabel('RAM Usage (bytes)')
 

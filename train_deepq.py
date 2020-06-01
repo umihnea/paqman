@@ -38,6 +38,7 @@ def run_episode(env, agent, current_episode, batch_size):
 
         observation = next_observation
 
+    agent.decay_epsilon()
     return score, agent.epsilon
 
 

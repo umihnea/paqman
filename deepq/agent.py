@@ -68,7 +68,6 @@ class Agent:
         self.q.optimizer.step()
 
         self.learning_step += 1
-        self._decay_epsilon()
 
     def _replace_target_network(self):
         """Syncs the target network with the main Q-network network."""
@@ -91,11 +90,8 @@ class Agent:
 
         return t_states, t_actions, t_rewards, t_next_states, t_dones
 
-    def _decay_epsilon(self):
-        new_epsilon = self.epsilon - self.epsilon_decay
-        if new_epsilon <= self.epsilon_end:
-            self.epsilon = self.epsilon_end
-        self.epsilon = new_epsilon
+    def decay_epsilon(self):
+        self.epsilon = max(self.epsilon - self.epsilon_decay, self.epsilon_end)
 
     def store(self, observation, action, reward, next_observation, done):
         self.replay_memory.add_transition(observation, action, reward, next_observation, done)

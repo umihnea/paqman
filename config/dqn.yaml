@@ -1,18 +1,18 @@
 training:
   gym_id: Breakout-v4
-  num_episodes: 4000
+  num_episodes: 7000
 model:
   learning_rate: 1e-4
   gamma: 0.99
   epsilon: 1.0
-  epsilon_end: 0.1
-  epsilon_decay: 1e-5
+  epsilon_end: 0.05
+  epsilon_decay: 3.8e-4
   batch_size: 32
-  replace_every: 500
+  replace_every: 1000
   memory_gb: 3
 checkpoints:
   path: ../data/checkpoints/
-  every: 500
+  every: 1000
   on_highscore: True
 logs:
   path: ../data/logs/

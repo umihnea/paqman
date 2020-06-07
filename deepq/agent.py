@@ -1,17 +1,15 @@
 import numpy as np
 import torch
-from gym import logger
 from gym.spaces import Discrete
 
 from deepq.network import DeepQNetwork
 from deepq.replay_memory import ReplayMemory
-from plot.plot import get_timestamp
 
 
 class Agent:
     def __init__(self, gamma=0.99, epsilon=1.0, epsilon_decay=1e-5, epsilon_end=0.1, learning_rate=1e-4,
                  memory_capacity=50_000, replace_every=1000, action_space=Discrete(4), state_shape=(4, 84, 84)):
-        self.gamma = float(gamma)
+        self.gamma = float(gamma)  # todo: just pass the training part of the config dictionary
         self.epsilon = float(epsilon)
         self.epsilon_end = float(epsilon_end)
         self.epsilon_decay = float(epsilon_decay)
@@ -96,26 +94,25 @@ class Agent:
     def store(self, observation, action, reward, next_observation, done):
         self.replay_memory.add_transition(observation, action, reward, next_observation, done)
 
-    def save_checkpoint(self, path):
-        path = '%s/checkpoint_from_%s.pyt' % (path, get_timestamp())
-        torch.save({
+    @property
+    def checkpoint_data(self):
+        return {
             'learning_step': self.learning_step,
             'q': self.q.state_dict(),
             'next_q': self.next_q.state_dict(),
             'optimizer': self.q.optimizer.state_dict(),
             'epsilon': self.epsilon,
-        }, path)
-        logger.info('Saved checkpoint at %s.', path)
+        }
 
-    def load_checkpoint(self, path):
-        checkpoint = torch.load(path)
-        self.q.load_state_dict(checkpoint['q'])
-        self.next_q.load_state_dict(checkpoint['next_q'])
-        self.q.optimizer.load_state_dict(checkpoint['optimizer'])
-        self.epsilon = checkpoint['epsilon']
-        self.learning_step = checkpoint['learning_step']
-
-        logger.info('Loaded checkpoint from %s.', path)
-
-        self.q.train()
-        self.next_q.train()
+    # def load_checkpoint(self, path):
+    #     checkpoint = torch.load(path)
+    #     self.q.load_state_dict(checkpoint['q'])
+    #     self.next_q.load_state_dict(checkpoint['next_q'])
+    #     self.q.optimizer.load_state_dict(checkpoint['optimizer'])
+    #     self.epsilon = checkpoint['epsilon']
+    #     self.learning_step = checkpoint['learning_step']
+    #
+    #     logging.info('Loaded checkpoint from %s.', path)
+    #
+    #     self.q.train()
+    #     self.next_q.train()

@@ -4,13 +4,12 @@ import os
 import sys
 
 import numpy as np
+import psutil
 import torch
 import yaml
-import psutil
 
 from deepq.agent import Agent
 from deepq.checkpoint_manager import CheckpointManager
-from deepq.replay_memory import ReplayMemory
 from plot.plot import plot_scores, plot_ram
 from wrappers.wrappers import make_env
 
@@ -21,7 +20,7 @@ logging.basicConfig(
 )
 
 
-def run_episode(env, agent, current_episode, batch_size):
+def run_episode(env, agent, current_episode):
     score = 0
     done = False
     observation = env.reset()
@@ -34,8 +33,8 @@ def run_episode(env, agent, current_episode, batch_size):
 
         agent.store(observation, action, reward, next_observation, done)
 
-        if current_episode >= batch_size:
-            agent.learn(batch_size)
+        if current_episode >= 0:
+            agent.learn()
 
         observation = next_observation
 
@@ -67,7 +66,7 @@ def shutdown_training(episode, scores, epsilons, plots_path, agent, checkpoint_m
 
 def get_parser():
     parser = argparse.ArgumentParser(description='Train a DQN agent')
-    parser.add_argument('-c', '--conf', nargs='?', default=None, help='experiment configuration file', dest='filename',
+    parser.add_argument('-c', '--conf', nargs='?', default=None, help='training configuration file', dest='filename',
                         required=True)
 
     return parser
@@ -97,15 +96,6 @@ def to_absolute(root, path):
     return os.path.abspath(os.path.join(root, path))
 
 
-def capacity_from_gb(gb: float, state_shape) -> int:
-    rm = ReplayMemory(0, state_shape)
-    array_size = state_shape[0] * state_shape[1] * state_shape[2]
-    itemsize_sum = array_size * rm._states.itemsize + \
-                   array_size * rm._next_states.itemsize + \
-                   rm._actions.itemsize + rm._rewards.itemsize + rm._dones.itemsize
-    return gb * 1.074e+9 // itemsize_sum
-
-
 def main(conf_file):
     conf = load_conf(conf_file)
 
@@ -117,54 +107,40 @@ def main(conf_file):
     env = make_env(conf['training']['gym_id'])
     env.seed(0)
 
-    model = conf['model']
-    state_shape = env.observation_space.shape
-    capacity = capacity_from_gb(model['memory_gb'], state_shape)
-
-    agent = Agent(
-        gamma=model['gamma'],
-        epsilon=model['epsilon'],
-        epsilon_end=model['epsilon_end'],
-        epsilon_decay=model['epsilon_decay'],
-        learning_rate=model['learning_rate'],
-        memory_capacity=capacity,
-        replace_every=model['replace_every'],
-        action_space=env.action_space,
-        state_shape=state_shape
-    )
+    agent = Agent(conf['model'], action_space=env.action_space, state_shape=env.observation_space.shape)
 
     # Train
-    num_episodes = conf['training']['num_episodes']
-    batch_size = model['batch_size']
-    total_episodes = batch_size + num_episodes
+    batch_size = int(conf['model']['batch_size'])
+    total_episodes = int(conf['training']['num_episodes'])
 
-    episode = 0
     scores = []
     epsilons = []
-    top_score = float('-inf')
     ram_values = []
+    episode = 0
+    top_score = float('-inf')
 
     manager = CheckpointManager(conf['checkpoints'])
 
-    for episode in range(total_episodes):
+    # A negative episode index indicates that the agent does not learn,
+    # but instead it just plays at random to gain some experience beforehand.
+    for episode in range(-batch_size, total_episodes):
         try:
-            score, epsilon = run_episode(env, agent, episode, batch_size)
-
-            mean_score = np.mean(scores) if scores else 0.0
+            score, epsilon = run_episode(env, agent, episode)
             top_score = max(top_score, score)
 
-            episode_index = episode - batch_size  # De-offset episode by batch_size.
-
-            logging.info(
-                '[Episode %d] Score: %d, Top score: %.2f, Avg. score: %.2f, Epsilon: %.3f',
-                episode_index, score, top_score, mean_score, epsilon
-            )
-
-            manager.step(agent, score, episode_index)
+            # Performance metric for how well an agent does at a given point
+            # is the mean performance over the last 100 steps.
+            metric = np.mean(scores[-100:]).item() if len(scores) > 100 else np.mean(scores).item()
+            manager.step(agent, metric, episode)
 
             scores.append(score)
             epsilons.append(epsilon)
             add_ram_usage(ram_values)
+
+            logging.info(
+                '[Episode %d] Score: %d, Top score: %.2f, Mean score (last 100): %.2f, Epsilon: %.3f',
+                episode, score, top_score, metric, epsilon
+            )
 
         except KeyboardInterrupt:
             logging.info('Gracefully shutting down...')

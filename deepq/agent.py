@@ -7,27 +7,25 @@ from deepq.replay_memory import ReplayMemory
 
 
 class Agent:
-    def __init__(self, gamma=0.99, epsilon=1.0, epsilon_decay=1e-5, epsilon_end=0.1, learning_rate=1e-4,
-                 memory_capacity=50_000, replace_every=1000, action_space=Discrete(4), state_shape=(4, 84, 84)):
-        self.gamma = float(gamma)  # todo: just pass the training part of the config dictionary
-        self.epsilon = float(epsilon)
-        self.epsilon_end = float(epsilon_end)
-        self.epsilon_decay = float(epsilon_decay)
-        self.learning_rate = float(learning_rate)
+    def __init__(self, model_parameters, action_space=Discrete(4), state_shape=(4, 84, 84)):
+        self.learning_rate = float(model_parameters['learning_rate'])
+        self.gamma = float(model_parameters['gamma'])
+
+        self.epsilon = float(model_parameters['epsilon'])
+        self.epsilon_end = float(model_parameters['epsilon_end'])
+        self.epsilon_decay = float(model_parameters['epsilon_decay'])
+        self.batch_size = int(model_parameters['batch_size']) or 32
+        self.replace_every = int(model_parameters['replace_every'])
 
         self.action_space = action_space
 
-        self.replay_memory = ReplayMemory(int(memory_capacity), state_shape)
-
-        # The rate at which we swap the two networks
-        self.replace_every = int(replace_every)
-
-        self.step = 0
-        self.learning_step = 0
+        self.replay_memory = ReplayMemory(float(model_parameters['memory_gb']), state_shape)
 
         self.q = DeepQNetwork(self.learning_rate, state_shape, action_space.n)
         self.next_q = DeepQNetwork(self.learning_rate, state_shape, action_space.n)
         self.device = self.q.device
+
+        self.learning_step = 0
 
     def act(self, observation):
         """Act in an epsilon-greedy manner.

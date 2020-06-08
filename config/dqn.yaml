@@ -14,7 +14,6 @@ checkpoints:
   path: ../data/checkpoints/
   max_size: 5
   every: 500
-  on_highscore: True
 logs:
   path: ../data/logs/
 monitor:

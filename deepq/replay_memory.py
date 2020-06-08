@@ -2,7 +2,8 @@ import numpy as np
 
 
 class ReplayMemory:
-    def __init__(self, capacity, state_shape):
+    def __init__(self, raw_space, state_shape):
+        capacity = self.from_gigabytes(raw_space, state_shape)
         self._states = np.empty((capacity, *state_shape), np.float32)
         self._next_states = np.empty((capacity, *state_shape), np.float32)
         self._actions = np.empty(capacity, np.uint8)
@@ -10,6 +11,11 @@ class ReplayMemory:
         self._dones = np.empty(capacity, np.bool)
         self.capacity = capacity
         self.size = 0
+
+    @staticmethod
+    def from_gigabytes(gigabytes: float, state_shape) -> int:
+        array_size = state_shape[0] * state_shape[1] * state_shape[2]
+        return int(np.rint((gigabytes * 1.074e+9) // (8 * array_size + 6)).item())
 
     def sample(self, batch_size):
         """Sample a mini-batch of transitions from the replay memory.

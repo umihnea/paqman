@@ -25,17 +25,13 @@ class CheckpointManager:
         self.checkpoints = []
         self.checkpoint_count = 0
 
-        self.current_best = 0.0
-
     def step(self, agent, score: float, episode: int):
-        if episode % self.every == 0 or score > self.current_best:
+        if episode % self.every == 0:
             self.add(agent.checkpoint_data, score, episode)
-            self.current_best = max(score, self.current_best)
-
             logging.info('Checkpoint taken at episode %d.', episode)
 
     def add(self, data, score: float, episode: int, commit=True):
-        filename = 'episode_%d.pyt' % self.checkpoint_count
+        filename = 'checkpoint_%d.pyt' % self.checkpoint_count
         checkpoint = Checkpoint(datetime.datetime.now(), score, episode, filename)
 
         scores = [c.score for c in self.checkpoints]
@@ -49,7 +45,7 @@ class CheckpointManager:
         self.checkpoints.insert(index, checkpoint)
         self._save_checkpoint(data, filename, commit)
 
-        if len(self.checkpoints) >= self.max_size:
+        if len(self.checkpoints) > self.max_size:
             self._delete_checkpoint(self.checkpoints[0].filename, commit)
             self.checkpoints.pop(0)
 

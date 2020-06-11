@@ -25,6 +25,8 @@ class CheckpointManager:
         self.checkpoints = []
         self.checkpoint_count = 0
 
+        self.forced_checkpoints = []
+
     def step(self, agent, score: float, episode: int):
         if episode % self.every == 0:
             self.add(agent.checkpoint_data, score, episode)
@@ -49,6 +51,16 @@ class CheckpointManager:
             self._delete_checkpoint(self.checkpoints[0].filename, commit)
             self.checkpoints.pop(0)
 
+    def force_add(self, data, score: float, episode: int, commit=True):
+        """Add checkpoint files in a separate, uncontrolled list.
+        Forced checkpoints are not limited and are not compared against
+        previous entries.
+        """
+        filename = "forced_save_%d.pyt" % len(self.forced_checkpoints)
+        checkpoint = Checkpoint(datetime.datetime.now(), score, episode, filename)
+        self._save_checkpoint(data, filename, commit)
+        self.forced_checkpoints.append(checkpoint)
+
     def _save_checkpoint(self, data, filename, commit):
         if not commit:
             return
@@ -65,12 +77,13 @@ class CheckpointManager:
 
     def log_data(self):
         path = os.path.join(self.path, "checkpoint_data.txt")
+        table = []
+        headers = ["filename", "episode", "score", "timestamp"]
         with open(path, "w") as f:
-            table = [["filename", "episode", "score", "timestamp"]]
-            for point in self.checkpoints:
+            for point in self.checkpoints + self.forced_checkpoints:
                 timestamp = point.time.strftime("%d-%m-%Y %H:%M:%S")
                 table.append([point.filename, point.episode, point.score, timestamp])
 
             from tabulate import tabulate
 
-            f.write(tabulate(table))
+            f.write(tabulate(table, headers=headers))

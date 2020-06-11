@@ -113,7 +113,9 @@ class Trainer:
         return score, self.agent.epsilon
 
     def shutdown(self, episode):
-        self.manager.add(self.agent.checkpoint_data, self._compute_metric(), episode)
+        self.manager.force_add(
+            self.agent.checkpoint_data, self._compute_metric(), episode
+        )
         self.manager.log_data()
 
         plots_path = self.conf["plots"]["path"]

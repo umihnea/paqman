@@ -10,15 +10,15 @@ class Evaluator:
 
     def __init__(self, path_to_config, path_to_checkpoint):
         conf = ConfLoader(path_to_config).load()
-        self.plots_path = conf['plots']['path']
-        self.num_episodes = int(conf['evaluation']['num_episodes'])
+        self.plots_path = conf["plots"]["path"]
+        self.num_episodes = int(conf["evaluation"]["num_episodes"])
 
         # Wrap environment in Monitor wrapper
-        env = make_env(conf['training']['gym_id'], monitor_path=conf['monitor']['path'])
+        env = make_env(conf["training"]["gym_id"], monitor_path=conf["monitor"]["path"])
         env.seed(0)
         self.env = env
 
-        self.agent = Agent.from_checkpoint(path_to_checkpoint, conf['model'], env)
+        self.agent = Agent.from_checkpoint(path_to_checkpoint, conf["model"], env)
         self.agent.toggle_eval()
 
         self.scores = []
@@ -29,9 +29,10 @@ class Evaluator:
             score = self._run_episode()
             self.scores.append(score)
 
-            logging.info('[Episode %d] Score: %.2f', episode, score)
+            logging.info("[Episode %d] Score: %.2f", episode, score)
 
         from plot.plot import plot_evaluation
+
         plot_evaluation(self.scores, self.plots_path)
 
     def _run_episode(self) -> float:

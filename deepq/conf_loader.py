@@ -13,7 +13,7 @@ class ConfLoader:
         self.root = os.path.dirname(path)
 
     def load(self) -> Dict[str, any]:
-        with open(self.path, 'r') as f:
+        with open(self.path, "r") as f:
             conf = yaml.safe_load(f)
 
         self._to_absolute_paths(self.root, conf)
@@ -21,10 +21,12 @@ class ConfLoader:
 
     def _to_absolute_paths(self, root, conf):
         for key in conf.keys():
-            if key == 'path' or key.endswith('_path'):
+            if key == "path" or key.endswith("_path"):
                 conf[key] = self._to_absolute(conf[key])
                 if not os.path.exists(conf[key]):
-                    logging.error('[ConfLoader] Path \'%s\' for %s does not exist.', conf[key], key)
+                    logging.error(
+                        "[ConfLoader] Path '%s' for %s does not exist.", conf[key], key
+                    )
             if type(conf[key]) is dict:
                 self._to_absolute_paths(root, conf[key])
 

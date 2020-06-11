@@ -7,19 +7,23 @@ from deepq.replay_memory import ReplayMemory
 
 
 class Agent:
-    def __init__(self, model_parameters, action_space=Discrete(4), state_shape=(4, 84, 84)):
-        self.learning_rate = float(model_parameters['learning_rate'])
-        self.gamma = float(model_parameters['gamma'])
+    def __init__(
+        self, model_parameters, action_space=Discrete(4), state_shape=(4, 84, 84)
+    ):
+        self.learning_rate = float(model_parameters["learning_rate"])
+        self.gamma = float(model_parameters["gamma"])
 
-        self.epsilon = float(model_parameters['epsilon'])
-        self.epsilon_end = float(model_parameters['epsilon_end'])
-        self.epsilon_decay = float(model_parameters['epsilon_decay'])
-        self.batch_size = int(model_parameters['batch_size']) or 32
-        self.replace_every = int(model_parameters['replace_every'])
+        self.epsilon = float(model_parameters["epsilon"])
+        self.epsilon_end = float(model_parameters["epsilon_end"])
+        self.epsilon_decay = float(model_parameters["epsilon_decay"])
+        self.batch_size = int(model_parameters["batch_size"]) or 32
+        self.replace_every = int(model_parameters["replace_every"])
 
         self.action_space = action_space
 
-        self.replay_memory = ReplayMemory(float(model_parameters['memory_gb']), state_shape)
+        self.replay_memory = ReplayMemory(
+            float(model_parameters["memory_gb"]), state_shape
+        )
 
         self.q = DeepQNetwork(self.learning_rate, state_shape, action_space.n)
         self.next_q = DeepQNetwork(self.learning_rate, state_shape, action_space.n)
@@ -46,7 +50,9 @@ class Agent:
         self._replace_target_network()
 
         # Sample a mini-batch from the replay memory
-        states, actions, rewards, next_states, dones = self._batch_as_tensors(batch_size)
+        states, actions, rewards, next_states, dones = self._batch_as_tensors(
+            batch_size
+        )
 
         q_pred = self.q(states)
         q_pred = q_pred[np.arange(batch_size), actions.tolist()]
@@ -75,7 +81,9 @@ class Agent:
 
     def _batch_as_tensors(self, batch_size):
         """Sample the batch then convert from NumPy arrays to Torch tensors."""
-        states, actions, rewards, next_states, dones = self.replay_memory.sample(batch_size)
+        states, actions, rewards, next_states, dones = self.replay_memory.sample(
+            batch_size
+        )
 
         t_states = torch.from_numpy(states).float().to(self.device)
         t_next_states = torch.from_numpy(next_states).float().to(self.device)
@@ -90,39 +98,39 @@ class Agent:
         self.epsilon = max(self.epsilon - self.epsilon_decay, self.epsilon_end)
 
     def store(self, observation, action, reward, next_observation, done):
-        self.replay_memory.add_transition(observation, action, reward, next_observation, done)
+        self.replay_memory.add_transition(
+            observation, action, reward, next_observation, done
+        )
 
     @property
     def checkpoint_data(self):
         return {
-            'learning_step': self.learning_step,
-            'q': self.q.state_dict(),
-            'next_q': self.next_q.state_dict(),
-            'optimizer': self.q.optimizer.state_dict(),
-            'epsilon': self.epsilon,
+            "learning_step": self.learning_step,
+            "q": self.q.state_dict(),
+            "next_q": self.next_q.state_dict(),
+            "optimizer": self.q.optimizer.state_dict(),
+            "epsilon": self.epsilon,
         }
 
     @classmethod
     def from_checkpoint(cls, path, conf, env):
         """Load from PyTorch checkpoint file.
         See custom format of file in checkpoint_data. """
-        conf['memory_gb'] = 0  # Don't allocate memory for replay buffer
+        conf["memory_gb"] = 0  # Don't allocate memory for replay buffer
 
         agent = cls(
-            conf,
-            action_space=env.action_space,
-            state_shape=env.observation_space.shape
+            conf, action_space=env.action_space, state_shape=env.observation_space.shape
         )
 
         # agent.device already contains the correct device,
         # depending on what is available on the machine.
         checkpoint = torch.load(path, map_location=agent.device)
 
-        agent.q.load_state_dict(checkpoint['q'])
-        agent.next_q.load_state_dict(checkpoint['next_q'])
-        agent.q.optimizer.load_state_dict(checkpoint['optimizer'])
-        agent.epsilon = float(checkpoint['epsilon'])
-        agent.learning_step = int(checkpoint['learning_step'])
+        agent.q.load_state_dict(checkpoint["q"])
+        agent.next_q.load_state_dict(checkpoint["next_q"])
+        agent.q.optimizer.load_state_dict(checkpoint["optimizer"])
+        agent.epsilon = float(checkpoint["epsilon"])
+        agent.learning_step = int(checkpoint["learning_step"])
 
         return agent
 

@@ -18,9 +18,9 @@ class Checkpoint:
 
 class CheckpointManager:
     def __init__(self, config):
-        self.path = config['path']
-        self.max_size = int(config['max_size'])
-        self.every = int(config['every'])
+        self.path = config["path"]
+        self.max_size = int(config["max_size"])
+        self.every = int(config["every"])
 
         self.checkpoints = []
         self.checkpoint_count = 0
@@ -28,10 +28,10 @@ class CheckpointManager:
     def step(self, agent, score: float, episode: int):
         if episode % self.every == 0:
             self.add(agent.checkpoint_data, score, episode)
-            logging.info('Checkpoint taken at episode %d.', episode)
+            logging.info("Checkpoint taken at episode %d.", episode)
 
     def add(self, data, score: float, episode: int, commit=True):
-        filename = 'checkpoint_%d.pyt' % self.checkpoint_count
+        filename = "checkpoint_%d.pyt" % self.checkpoint_count
         checkpoint = Checkpoint(datetime.datetime.now(), score, episode, filename)
 
         scores = [c.score for c in self.checkpoints]
@@ -64,12 +64,13 @@ class CheckpointManager:
         os.remove(path)
 
     def log_data(self):
-        path = os.path.join(self.path, 'checkpoint_data.txt')
-        with open(path, 'w') as f:
-            table = [['episode', 'score', 'timestamp']]
+        path = os.path.join(self.path, "checkpoint_data.txt")
+        with open(path, "w") as f:
+            table = [["episode", "score", "timestamp"]]
             for point in self.checkpoints:
-                timestamp = point.time.strftime('%d-%m-%Y %H:%M:%S')
+                timestamp = point.time.strftime("%d-%m-%Y %H:%M:%S")
                 table.append([point.episode, point.score, timestamp])
 
             from tabulate import tabulate
+
             f.write(tabulate(table))

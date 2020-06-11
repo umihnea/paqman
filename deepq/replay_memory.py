@@ -15,7 +15,7 @@ class ReplayMemory:
     @staticmethod
     def from_gigabytes(gigabytes: float, state_shape) -> int:
         array_size = state_shape[0] * state_shape[1] * state_shape[2]
-        return int(np.rint((gigabytes * 1.074e+9) // (8 * array_size + 6)).item())
+        return int(np.rint((gigabytes * 1.074e9) // (8 * array_size + 6)).item())
 
     def sample(self, batch_size):
         """Sample a mini-batch of transitions from the replay memory.

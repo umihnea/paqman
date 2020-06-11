@@ -66,10 +66,10 @@ class CheckpointManager:
     def log_data(self):
         path = os.path.join(self.path, "checkpoint_data.txt")
         with open(path, "w") as f:
-            table = [["episode", "score", "timestamp"]]
+            table = [["filename", "episode", "score", "timestamp"]]
             for point in self.checkpoints:
                 timestamp = point.time.strftime("%d-%m-%Y %H:%M:%S")
-                table.append([point.episode, point.score, timestamp])
+                table.append([point.filename, point.episode, point.score, timestamp])
 
             from tabulate import tabulate
 

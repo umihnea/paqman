@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 from datetime import datetime
+import numpy as np
 
 
 def get_timestamp():
@@ -37,4 +38,19 @@ def plot_ram(ram_values, output):
     plt.ylabel('RAM Usage (bytes)')
 
     fig.savefig(output + '/ram_usage_plot_' + get_timestamp() + '.png')
+    plt.clf()
+
+
+def plot_evaluation(scores, output):
+    fig = plt.figure()
+    ax = plt.axes()
+
+    ax.plot(scores, c='b')
+    plt.xlabel('Episode')
+    plt.ylabel('Score')
+
+    mean = np.mean(scores).item()
+    ax.axhline(y=mean, color='r', linestyle='-')
+
+    fig.savefig(output + '/eval_plot_' + get_timestamp() + '.png')
     plt.clf()

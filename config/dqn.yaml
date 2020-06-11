@@ -20,3 +20,5 @@ monitor:
   path: ../data/monitor/
 plots:
   path: ../data/plots/
+evaluation:
+  num_episodes: 200

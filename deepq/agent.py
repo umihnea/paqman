@@ -102,15 +102,34 @@ class Agent:
             'epsilon': self.epsilon,
         }
 
-    # def load_checkpoint(self, path):
-    #     checkpoint = torch.load(path)
-    #     self.q.load_state_dict(checkpoint['q'])
-    #     self.next_q.load_state_dict(checkpoint['next_q'])
-    #     self.q.optimizer.load_state_dict(checkpoint['optimizer'])
-    #     self.epsilon = checkpoint['epsilon']
-    #     self.learning_step = checkpoint['learning_step']
-    #
-    #     logging.info('Loaded checkpoint from %s.', path)
-    #
-    #     self.q.train()
-    #     self.next_q.train()
+    @classmethod
+    def from_checkpoint(cls, path, conf, env):
+        """Load from PyTorch checkpoint file.
+        See custom format of file in checkpoint_data. """
+        conf['memory_gb'] = 0  # Don't allocate memory for replay buffer
+
+        agent = cls(
+            conf,
+            action_space=env.action_space,
+            state_shape=env.observation_space.shape
+        )
+
+        # agent.device already contains the correct device,
+        # depending on what is available on the machine.
+        checkpoint = torch.load(path, map_location=agent.device)
+
+        agent.q.load_state_dict(checkpoint['q'])
+        agent.next_q.load_state_dict(checkpoint['next_q'])
+        agent.q.optimizer.load_state_dict(checkpoint['optimizer'])
+        agent.epsilon = float(checkpoint['epsilon'])
+        agent.learning_step = int(checkpoint['learning_step'])
+
+        return agent
+
+    def toggle_eval(self):
+        self.q.eval()
+        self.next_q.eval()
+
+    def toggle_training(self):
+        self.q.train()
+        self.next_q.train()

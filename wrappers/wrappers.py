@@ -4,6 +4,7 @@ import collections
 import cv2
 import numpy as np
 import gym
+from gym.wrappers import Monitor
 
 
 class RepeatActionAndMaxFrame(gym.Wrapper):
@@ -91,8 +92,12 @@ class StackFrames(gym.ObservationWrapper):
 
 
 def make_env(env_name, shape=(84, 84, 1), repeat=4, clip_rewards=False,
-             no_ops=0, fire_first=False):
+             no_ops=0, fire_first=False, monitor_path=None):
     env = gym.make(env_name)
+
+    if monitor_path is not None:
+        env = Monitor(env, monitor_path, force=True)
+
     env = RepeatActionAndMaxFrame(env, repeat, clip_rewards, no_ops, fire_first)
     env = PreprocessFrame(shape, env)
     env = StackFrames(env, repeat)

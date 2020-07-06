@@ -31,18 +31,6 @@ def plot_scores(scores, epsilons, output_directory):
     plt.clf()
 
 
-def plot_ram(ram_values, output):
-    fig = plt.figure()
-    ax = plt.axes()
-
-    ax.plot(ram_values, c="b")
-    plt.xlabel("Episode")
-    plt.ylabel("RAM Usage (bytes)")
-
-    fig.savefig(output + "/ram_usage_plot_" + get_timestamp() + ".png")
-    plt.clf()
-
-
 def plot_evaluation(scores, output):
     fig = plt.figure()
     ax = plt.axes()

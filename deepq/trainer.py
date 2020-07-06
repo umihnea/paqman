@@ -1,5 +1,6 @@
 import logging
 import os
+import pickle
 import sys
 from typing import Tuple
 
@@ -10,7 +11,6 @@ import torch
 from deepq.agent import Agent
 from deepq.checkpoint_manager import CheckpointManager
 from deepq.conf_loader import ConfLoader
-from plot.plot import plot_scores, plot_ram
 from wrappers.wrappers import make_env
 
 
@@ -118,9 +118,18 @@ class Trainer:
         )
         self.manager.log_data()
 
-        plots_path = self.conf["plots"]["path"]
-        plot_scores(self.scores, self.epsilons, plots_path)
-        plot_ram(self.memory_usage, plots_path)
+        # Pickle lists for analysis by outside tools.
+        base_path = self.conf["logs"]["path"]
+        scores_path = os.path.join(base_path, "scores.pkl")
+        epsilons_path = os.path.join(base_path, "epsilons.pkl")
+        memory_usage_path = os.path.join(base_path, "memory_usage.pkl")
+
+        with open(scores_path, "wb") as f:
+            pickle.dump(self.scores, f)
+        with open(epsilons_path, "wb") as f:
+            pickle.dump(self.epsilons, f)
+        with open(memory_usage_path, "wb") as f:
+            pickle.dump(self.memory_usage, f)
 
         self._zip_data()
         logging.info("Done.")

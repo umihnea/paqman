@@ -1,0 +1,22 @@
+name: paqman-conda
+channels:
+  - pytorch
+  - fastai
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.7
+  - pip=20.0.2
+  - pytorch=1.4.0  #=py3.7_cuda10.1.243_cudnn7.6.3_0
+  - torchvision=0.5  #=py37_cu101
+  - opencv=4.2.0
+  - pyyaml
+  - black
+  - numpy
+  - pandas
+  - matplotlib
+  - pip:
+    - tabulate
+    - gym
+    - atari-py
+    - psutil

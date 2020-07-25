@@ -50,7 +50,8 @@ class Trainer:
     def train(self):
         """This is the main training loop.
         A negative episode index indicates that the agent does not learn,
-        but instead it just plays at random to gain some experience beforehand."""
+        but instead it just plays at random to gain some experience beforehand.
+        """
         for episode in range(-self.batch_size, self.total_episodes):
             try:
                 score, epsilon = self.run_episode(episode)

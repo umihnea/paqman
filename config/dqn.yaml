@@ -1,4 +1,5 @@
 training:
+  name: dqn
   gym_id: Breakout-v4
   num_episodes: 200000
 model:

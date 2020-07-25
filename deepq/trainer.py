@@ -2,6 +2,7 @@ import logging
 import os
 import pickle
 import sys
+from datetime import datetime
 from typing import Tuple
 
 import numpy as np
@@ -120,25 +121,30 @@ class Trainer:
         self.manager.log_data()
 
         # Pickle lists for analysis by outside tools.
-        base_path = self.conf["logs"]["path"]
-        scores_path = os.path.join(base_path, "scores.pkl")
-        epsilons_path = os.path.join(base_path, "epsilons.pkl")
-        memory_usage_path = os.path.join(base_path, "memory_usage.pkl")
+        self._pickle_data(self.scores, "scores")
+        self._pickle_data(self.epsilons, "epsilons")
+        self._pickle_data(self.memory_usage, "memory_usage")
 
-        with open(scores_path, "wb") as f:
-            pickle.dump(self.scores, f)
-        with open(epsilons_path, "wb") as f:
-            pickle.dump(self.epsilons, f)
-        with open(memory_usage_path, "wb") as f:
-            pickle.dump(self.memory_usage, f)
+        # Compress data into a .tar.gz archive.
+        import shutil
 
-        self._zip_data()
+        shutil.make_archive(
+            "data/results", "gztar", ".", "data", logger=logging.getLogger("zip_data")
+        )
+
         logging.info("Done.")
         logging.shutdown()
 
-    @staticmethod
-    def _zip_data():
-        import shutil
+    def _pickle_data(self, data, base_name):
+        """Pickle data to a file named based on the nickname of the current training
+        process and a base name which describes what the file contains.
+        """
+        filename = "{base_name}_{name}_{date}.pkl".format(
+            base_name=base_name,
+            name=self.conf["training"]["name"],
+            date=datetime.now().strftime("%d%b_%H-%M-%S"),
+        )
+        path = os.path.join(self.conf["logs"]["path"], filename)
 
-        logger = logging.getLogger("zip_everything")
-        shutil.make_archive("data/results", "gztar", ".", "data", logger=logger)
+        with open(path, "wb") as file:
+            pickle.dump(data, file)

@@ -36,7 +36,7 @@ class Batch:
 class ReplayMemory:
     def __init__(self, raw_space, state_shape):
         self.memory = []
-        self.capacity = self.from_gigabytes(raw_space, state_shape)
+        self.capacity = 100  # todo: revert to self.from_gigabytes(raw_space, state_shape)
         self.size = 0
 
     @staticmethod

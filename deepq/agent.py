@@ -49,10 +49,9 @@ class Agent:
         self.q.optimizer.zero_grad()
         self._replace_target_network()
 
-        # Sample a mini-batch from the replay memory
-        states, actions, rewards, next_states, dones = self._batch_as_tensors(
+        states, actions, rewards, next_states, dones = self.replay_memory.sample(
             batch_size
-        )
+        ).as_tensors(self.device)
 
         q_pred = self.q(states)
         q_pred = q_pred[np.arange(batch_size), actions.tolist()]
@@ -72,27 +71,13 @@ class Agent:
         self.learning_step += 1
 
     def _replace_target_network(self):
-        """Syncs the target network with the main Q-network network."""
+        """Sync the target network to the main network.
+        """
         if self.replace_every is None:
             return
 
         if self.learning_step % self.replace_every == 0:
             self.next_q.load_state_dict(self.q.state_dict())
-
-    def _batch_as_tensors(self, batch_size):
-        """Sample the batch then convert from NumPy arrays to Torch tensors."""
-        states, actions, rewards, next_states, dones = self.replay_memory.sample(
-            batch_size
-        )
-
-        t_states = torch.from_numpy(states).float().to(self.device)
-        t_next_states = torch.from_numpy(next_states).float().to(self.device)
-
-        t_actions = torch.from_numpy(actions).to(self.device)
-        t_rewards = torch.from_numpy(rewards).float().to(self.device)
-        t_dones = torch.from_numpy(dones).bool().to(self.device)
-
-        return t_states, t_actions, t_rewards, t_next_states, t_dones
 
     def decay_epsilon(self):
         self.epsilon = max(self.epsilon - self.epsilon_decay, self.epsilon_end)
@@ -115,7 +100,8 @@ class Agent:
     @classmethod
     def from_checkpoint(cls, path, conf, env):
         """Load from PyTorch checkpoint file.
-        See custom format of file in checkpoint_data. """
+        See custom format of file in checkpoint_data.
+        """
         conf["memory_gb"] = 0  # Don't allocate memory for replay buffer
 
         agent = cls(

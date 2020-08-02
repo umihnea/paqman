@@ -3,7 +3,7 @@ import torch
 from gym.spaces import Discrete
 
 from deepq.network import DeepQNetwork
-from deepq.replay_memory import ReplayMemory
+from replay_memory.replay_memory import ReplayMemory
 
 
 class Agent:

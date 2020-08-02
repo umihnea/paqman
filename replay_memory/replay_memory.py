@@ -1,36 +1,7 @@
-from dataclasses import dataclass
-
 import numpy as np
-import torch
 
-
-@dataclass
-class Transition:
-    state: np.ndarray
-    action: np.uint8
-    reward: np.float32
-    next_state: np.ndarray
-    done: np.bool = np.bool(0)
-
-
-@dataclass
-class Batch:
-    states: np.ndarray
-    actions: np.ndarray
-    rewards: np.ndarray
-    next_states: np.ndarray
-    dones: np.ndarray
-
-    def as_tensors(self, device):
-        """Sample the batch then convert from NumPy arrays to Torch tensors.
-        """
-        states = torch.from_numpy(self.states).float().to(device)
-        next_states = torch.from_numpy(self.next_states).float().to(device)
-        actions = torch.from_numpy(self.actions).to(device)
-        rewards = torch.from_numpy(self.rewards).float().to(device)
-        dones = torch.from_numpy(self.dones).bool().to(device)
-
-        return states, actions, rewards, next_states, dones
+from replay_memory.batch import Batch
+from replay_memory.transition import Transition
 
 
 class ReplayMemory:
@@ -41,7 +12,8 @@ class ReplayMemory:
 
     @staticmethod
     def from_gigabytes(gigabytes: float, state_shape) -> int:
-        """Approximate maximum array capacity based on a memory limit given in gigabytes. """
+        """Approximate maximum array capacity based on a memory limit given in gigabytes.
+        """
         array_size = state_shape[0] * state_shape[1] * state_shape[2]
         return int(np.rint((gigabytes * 1.074e9) // (8 * array_size + 6)).item())
 

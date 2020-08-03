@@ -1,6 +1,6 @@
 import numpy as np
 
-from common.sum_tree import SumTree
+from ds.sum_tree import SumTree
 from replay_memory.batch import Batch
 from replay_memory.replay_memory import ReplayMemory
 
@@ -8,13 +8,14 @@ import logging
 
 
 class PrioritizedReplayMemory(ReplayMemory):
-    def __init__(self, raw_space, state_shape, alpha):
+    def __init__(self, raw_space, state_shape, alpha, epsilon):
         super().__init__(raw_space, state_shape)
         self.logger = logging.getLogger(self.__class__.__name__)
         self.logger.setLevel(logging.DEBUG)
 
         # Hyperparameters
         self.alpha = alpha
+        self.epsilon = epsilon
         self.max_priority = 1.0
 
         # Find tree capacity from raw linear capacity
@@ -24,13 +25,16 @@ class PrioritizedReplayMemory(ReplayMemory):
         self.capacity = tree_capacity
 
         self.tree = SumTree(tree_capacity)
-        self.logger.debug("Tree initialized with capacity {}.", tree_capacity)
+        self.logger.debug("Tree initialized with capacity %d.", int(tree_capacity))
 
     def add_transition(self, state, action, reward, next_state, done):
         super().add_transition(state, action, reward, next_state, done)
         initial_priority = self.max_priority ** self.alpha
         self.tree[self.size - 1] = initial_priority
-        self.logger.debug("Added to tree with initial priority {}.", initial_priority)
+
+    def batch_update(self, indices, errors):
+        for index, error in zip(indices, errors):
+            self.tree[index] = (error + self.epsilon) ** self.alpha
 
     def _sample_indices(self, batch_size):
         indices = []
@@ -45,7 +49,14 @@ class PrioritizedReplayMemory(ReplayMemory):
 
         return indices
 
-    def sample(self, batch_size, beta=None):
+    def sample(self, batch_size):
         indices = self._sample_indices(batch_size)
-        weigths = []
-        # todo: to be contd
+        batch = Batch(
+            np.array([self.memory[i].state for i in indices]),
+            np.array([self.memory[i].action for i in indices]),
+            np.array([self.memory[i].reward for i in indices]),
+            np.array([self.memory[i].next_state for i in indices]),
+            np.array([self.memory[i].done for i in indices]),
+        )
+
+        return batch, indices

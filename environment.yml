@@ -16,8 +16,8 @@ dependencies:
   - pandas
   - matplotlib
   - jupyterlab
+  - tabulate
   - pip:
-    - tabulate
     - gym
     - atari-py
     - psutil

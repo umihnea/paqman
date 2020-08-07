@@ -55,18 +55,19 @@ class SumTree:
         assert 0 <= i < self.capacity
         return self.values[i + self.capacity]
 
+    def _recursive_prefix_sum(self, index, _sum):
+        left = 2 * index
+        right = left + 1
+
+        if left > len(self.values):
+            return index
+
+        if _sum <= self.values[left]:
+            return self._recursive_prefix_sum(left, _sum)
+        else:
+            return self._recursive_prefix_sum(right, _sum - self.values[left])
+
     def find_prefix_sum(self, prefix_sum):
         """Find an index i in the tree such that the sum up until i - 1 <= prefix_sum.
         """
-        index = 1
-        while index < self.capacity:
-            left = 2 * index
-            right = left + 1
-
-            if self.values[left] > prefix_sum:
-                index = left
-            else:
-                prefix_sum -= self.values[left]
-                index = right
-
-        return index - self.capacity
+        return self._recursive_prefix_sum(1, prefix_sum) - self.capacity + 1

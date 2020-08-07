@@ -17,6 +17,7 @@ dependencies:
   - matplotlib
   - jupyterlab
   - tabulate
+  - pytest
   - pip:
     - gym
     - atari-py

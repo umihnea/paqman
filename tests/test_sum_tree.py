@@ -2,7 +2,7 @@ from ds.sum_tree import SumTree
 
 
 def test_sum_tree():
-    data = list(range(0, 100))
+    data = list(range(1, 100))
     capacity = 2 * len(data)
 
     power_of_two = 1
@@ -28,14 +28,17 @@ def test_sum_tree():
     assert st[end] == data[end]
 
     # test queries, including explicit [0, x], implicit [0, x], [x, x], [x, x+1], [end, end]
-    def offline_query(dt, fr, to):
-        return sum(dt[fr:to+1])
+    def offline_query(dt, fr=0, to=None):
+        if to is None:
+            return sum(dt[fr:])
+
+        return sum(dt[fr:to + 1])
 
     assert st.query() == st.total
     assert st.query() == sum(data)
 
-    assert st.query(1) == offline_query(data, 1, end)
-    assert st.query(15) == offline_query(data, 15, end)
+    assert st.query(1) == offline_query(data, 1)
+    assert st.query(15) == offline_query(data, 15)
 
     assert st.query(3, 18) == offline_query(data, 3, 18)
     assert st.query(9, 12) == offline_query(data, 9, 12)

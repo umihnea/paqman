@@ -30,7 +30,8 @@ class PrioritizedReplayMemory(ReplayMemory):
     def add_transition(self, state, action, reward, next_state, done):
         super().add_transition(state, action, reward, next_state, done)
         initial_priority = self.max_priority ** self.alpha
-        self.tree[self.size - 1] = initial_priority
+        insert_position = self.size % self.capacity
+        self.tree[insert_position] = initial_priority
 
     def batch_update(self, indices, errors):
         for index, error in zip(indices, errors):

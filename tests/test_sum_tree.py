@@ -32,7 +32,7 @@ def test_sum_tree():
         if to is None:
             return sum(dt[fr:])
 
-        return sum(dt[fr:to + 1])
+        return sum(dt[fr : to + 1])
 
     assert st.query() == st.total
     assert st.query() == sum(data)

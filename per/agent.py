@@ -67,8 +67,8 @@ class PERAgent:
         q_target = rewards + self.gamma * q_next
 
         # PER
-        qt = q_target.detach().numpy()
-        qp = q_pred.detach().numpy()
+        qt = q_target.detach().cpu().numpy()
+        qp = q_pred.detach().cpu().numpy()
         error = np.abs(qt - qp)
         self.replay_memory.batch_update(indices, error)
 

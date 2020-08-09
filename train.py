@@ -4,7 +4,7 @@ import logging
 from deepq.trainer import Trainer
 
 logging.basicConfig(
-    filename="./data/logs/training_log.log",
+    filename="./data/logs/training.log",
     level=logging.DEBUG,
     format="%(asctime)s %(levelname)s: %(message)s",
 )

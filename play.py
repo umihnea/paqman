@@ -4,7 +4,7 @@ import logging
 from deepq.evaluator import Evaluator
 
 logging.basicConfig(
-    filename="./data/logs/evaluation_log.log",
+    filename="./data/logs/evaluation.log",
     level=logging.DEBUG,
     format="%(asctime)s %(levelname)s: %(message)s",
 )

@@ -57,12 +57,7 @@ class Agent:
         q_pred = q_pred[np.arange(batch_size), actions.tolist()]
 
         q_next = self.next_q(next_states)
-        q_next = q_next.max(dim=1)
-        q_next = q_next[0]
-
-        q_next[dones] = 0.0
-
-        q_target = rewards + self.gamma * q_next
+        q_target = self._compute_q_target(q_next, rewards, dones)
 
         loss = self.q.loss(q_pred, q_target).to(self.device)
         loss.backward()
@@ -70,9 +65,17 @@ class Agent:
 
         self.learning_step += 1
 
+    def _compute_q_target(
+        self, q_next: torch.tensor, rewards: torch.tensor, dones: torch.tensor
+    ) -> torch.tensor:
+        q_next = q_next.max(dim=1)
+        q_next = q_next[0]
+        q_next[dones] = 0.0
+
+        return rewards + self.gamma * q_next
+
     def _replace_target_network(self):
-        """Sync the target network to the main network.
-        """
+        """Sync the target network to the main network. """
         if self.replace_every is None:
             return
 
@@ -80,6 +83,8 @@ class Agent:
             self.next_q.load_state_dict(self.q.state_dict())
 
     def decay_epsilon(self):
+        """Called at the end of an episode to decay epsilon according to
+        a linear schedule. """
         self.epsilon = max(self.epsilon - self.epsilon_decay, self.epsilon_end)
 
     def store(self, observation, action, reward, next_observation, done):

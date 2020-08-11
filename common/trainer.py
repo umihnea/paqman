@@ -102,6 +102,7 @@ class Trainer:
         score = 0.0
         done = False
         observation = self.env.reset()
+        current_lives = 0
 
         while not done:
             action = self.agent.act(observation)
@@ -110,6 +111,13 @@ class Trainer:
             score += reward
 
             self.agent.store(observation, action, reward, next_observation, done)
+
+            # No death policy, todo: make this configurable
+            prev_lives = current_lives
+            current_lives = int(info["ale.lives"])
+
+            if current_lives < prev_lives:
+                done = True
 
             if episode >= 0:
                 self.agent.learn()

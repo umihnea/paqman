@@ -1,6 +1,6 @@
 training:
-  name: per
-  gym_id: Breakout-v4
+  name: dqn
+  gym_id: MsPacmanDeterministic-v0
   num_episodes: 200000
 model:
   learning_rate: 1e-4
@@ -11,8 +11,6 @@ model:
   batch_size: 32
   replace_every: 1000
   memory_gb: 3
-  per_alpha: 0.6
-  per_epsilon: 0.01
 checkpoints:
   path: ../data/checkpoints/
   max_size: 5

@@ -1,7 +1,8 @@
 import argparse
 import logging
 
-from deepq.trainer import Trainer
+from common.trainer import Trainer
+from per.trainer import PERTrainer
 
 logging.basicConfig(
     filename="./data/logs/training.log",
@@ -20,8 +21,18 @@ if __name__ == "__main__":
         dest="filename",
         required=True,
     )
+    parser.add_argument(
+        "--per", action="store_true", help="use prioritized experience replay"
+    )
+    parser.add_argument("--doubledqn", action="store_true", help="use double DQN")
 
     args = parser.parse_args()
 
-    trainer = Trainer(args.filename)
-    trainer.train()
+    if args.doubledqn:
+        raise NotImplementedError("Double DQN not yet implemented.")
+    elif args.per:
+        trainer = PERTrainer(args.filename)
+        trainer.train()
+    else:
+        trainer = Trainer(args.filename)
+        trainer.train()

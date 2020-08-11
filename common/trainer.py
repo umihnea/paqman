@@ -23,11 +23,7 @@ class Trainer:
         self.env = make_env(self.conf["training"]["gym_id"])
         self.env.seed(0)
 
-        self.agent = Agent(
-            self.conf["model"],
-            action_space=self.env.action_space,
-            state_shape=self.env.observation_space.shape,
-        )
+        self.agent = self._create_agent()
 
         self.manager = CheckpointManager(self.conf["checkpoints"])
 
@@ -40,6 +36,13 @@ class Trainer:
         self.epsilons = []
         self.memory_usage = []
         self.top_score = float("-inf")
+
+    def _create_agent(self):
+        return Agent(
+            self.conf["model"],
+            action_space=self.env.action_space,
+            state_shape=self.env.observation_space.shape,
+        )
 
     @staticmethod
     def _log_cuda_status():
@@ -131,7 +134,7 @@ class Trainer:
         import shutil
 
         shutil.make_archive(
-            "data/results", "gztar", ".", "data", logger=logging.getLogger("zip_data")
+            "data/results", "gztar", ".", "data", logger=logging.getLogger("zip_data"),
         )
 
         logging.info("Done.")

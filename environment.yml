@@ -22,3 +22,4 @@ dependencies:
     - gym
     - atari-py
     - psutil
+    - docformatter

@@ -1,5 +1,4 @@
-"""Copyright (c) 2019 Phil Tabor
-"""
+"""Copyright (c) 2019 Phil Tabor."""
 import collections
 import cv2
 import numpy as np

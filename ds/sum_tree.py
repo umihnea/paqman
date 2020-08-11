@@ -2,8 +2,7 @@ import numpy as np
 
 
 def overlaps(x, y, a, b) -> bool:
-    """Returns true if [x, y] is completely included within [A, B].
-    """
+    """Returns true if [x, y] is completely included within [A, B]."""
     return a <= x <= y <= b
 
 
@@ -31,8 +30,8 @@ class SumTree:
             return left + right
 
     def query(self, start=0, end=None):
-        """Returns the sum of all elements in the interval given by start and end.
-        """
+        """Returns the sum of all elements in the interval given by start and
+        end."""
         if end is None:
             end = self.capacity - 1
         return self._query_recursively(start, end, 1, 0, self.capacity - 1)

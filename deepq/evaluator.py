@@ -6,7 +6,7 @@ from wrappers.wrappers import make_env
 
 
 class Evaluator:
-    """Contains the evaluation logic for trained agents. """
+    """Contains the evaluation logic for trained agents."""
 
     def __init__(self, path_to_config, path_to_checkpoint):
         conf = ConfLoader(path_to_config).load()

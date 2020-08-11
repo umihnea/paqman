@@ -50,8 +50,10 @@ class Trainer:
 
     def train(self):
         """This is the main training loop.
-        A negative episode index indicates that the agent does not learn,
-        but instead it just plays at random to gain some experience beforehand.
+
+        A negative episode index indicates that the agent does not
+        learn, but instead it just plays at random to gain some
+        experience beforehand.
         """
         for episode in range(-self.batch_size, self.total_episodes):
             try:
@@ -136,9 +138,9 @@ class Trainer:
         logging.shutdown()
 
     def _pickle_data(self, data, base_name):
-        """Pickle data to a file named based on the nickname of the current training
-        process and a base name which describes what the file contains.
-        """
+        """Pickle data to a file named based on the nickname of the current
+        training process and a base name which describes what the file
+        contains."""
         filename = "{base_name}_{name}_{date}.pkl".format(
             base_name=base_name,
             name=self.conf["training"]["name"],

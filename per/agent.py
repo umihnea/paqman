@@ -41,10 +41,14 @@ class PERAgent(Agent):
 
     @staticmethod
     def _compute_error(q_target: torch.tensor, q_pred: torch.tensor) -> np.array:
-        """In classic DQN we can get by without computing the error manually.
-        Torch's loss functions take care of that. In prioritized replay, however,
-        we need the errors to compute priorities. This function additionally has
-        to copy the tensors back to main memory and convert them to numpy arrays."""
+        """Computes the absolute error between q_target and predicted values.
+
+        In classic DQN we can get by without computing the error
+        manually. Torch's loss functions take care of that. In
+        prioritized replay, however, we need the errors to compute
+        priorities. This function additionally has to copy the tensors
+        back to main memory and convert them to numpy arrays.
+        """
         q_target_numpy = q_target.detach().cpu().numpy()
         q_pred_numpy = q_pred.detach().cpu().numpy()
         return np.abs(q_target_numpy - q_pred_numpy)

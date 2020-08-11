@@ -35,6 +35,7 @@ class DeepQNetwork(nn.Module):
 
     def forward(self, observation):
         """Compute the forward pass of the Q-network.
+
         :param observation: nd-array representing the stack of emulator frames
         :return: q_values: Q-value of each action
         """

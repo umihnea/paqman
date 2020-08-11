@@ -12,15 +12,14 @@ class ReplayMemory:
 
     @staticmethod
     def from_gigabytes(gigabytes: float, state_shape) -> int:
-        """Approximate maximum array capacity based on a memory limit given in gigabytes.
-        """
+        """Approximate maximum array capacity based on a memory limit given in
+        gigabytes."""
         array_size = state_shape[0] * state_shape[1] * state_shape[2]
         return int(np.rint((gigabytes * 1.074e9) // (8 * array_size + 6)).item())
 
     def add_transition(self, state, action, reward, next_state, done):
-        """Place the next transition at position i % N,
-        where i is the next free cell and N is the memory capacity.
-        """
+        """Place the next transition at position i % N, where i is the next
+        free cell and N is the memory capacity."""
         transition = Transition(state, action, reward, next_state, done)
         if self.size < self.capacity:
             self.memory.append(transition)

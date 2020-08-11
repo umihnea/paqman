@@ -13,8 +13,7 @@ class Batch:
     dones: np.ndarray
 
     def as_tensors(self, device):
-        """Sample the batch then convert from NumPy arrays to Torch tensors.
-        """
+        """Sample the batch then convert from NumPy arrays to Torch tensors."""
         states = torch.from_numpy(self.states).float().to(device)
         next_states = torch.from_numpy(self.next_states).float().to(device)
         actions = torch.from_numpy(self.actions).to(device)

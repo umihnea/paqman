@@ -53,6 +53,7 @@ class CheckpointManager:
 
     def force_add(self, data, score: float, episode: int, commit=True):
         """Add checkpoint files in a separate, uncontrolled list.
+
         Forced checkpoints are not limited and are not compared against
         previous entries.
         """

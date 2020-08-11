@@ -33,6 +33,7 @@ class Agent:
 
     def act(self, observation):
         """Act in an epsilon-greedy manner.
+
         :param observation: nd-array representing a stack of emulator frames
         :return action: an action in the action space
         """
@@ -75,7 +76,7 @@ class Agent:
         return rewards + self.gamma * q_next
 
     def _replace_target_network(self):
-        """Sync the target network to the main network. """
+        """Sync the target network to the main network."""
         if self.replace_every is None:
             return
 
@@ -83,8 +84,8 @@ class Agent:
             self.next_q.load_state_dict(self.q.state_dict())
 
     def decay_epsilon(self):
-        """Called at the end of an episode to decay epsilon according to
-        a linear schedule. """
+        """Called at the end of an episode to decay epsilon according to a
+        linear schedule."""
         self.epsilon = max(self.epsilon - self.epsilon_decay, self.epsilon_end)
 
     def store(self, observation, action, reward, next_observation, done):
@@ -105,6 +106,7 @@ class Agent:
     @classmethod
     def from_checkpoint(cls, path, conf, env):
         """Load from PyTorch checkpoint file.
+
         See custom format of file in checkpoint_data.
         """
         conf["memory_gb"] = 0  # Don't allocate memory for replay buffer

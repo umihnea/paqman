@@ -1,7 +1,7 @@
 import argparse
 import logging
 
-from deepq.evaluator import Evaluator
+from common.evaluator import Evaluator
 
 logging.basicConfig(
     filename="./data/logs/evaluation.log",

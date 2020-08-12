@@ -1,7 +1,7 @@
 training:
   name: dqn
   gym_id: MsPacmanDeterministic-v0
-  num_episodes: 200000
+  num_episodes: 12240
 model:
   learning_rate: 1e-4
   gamma: 0.99
@@ -19,7 +19,5 @@ logs:
   path: ../data/logs/
 monitor:
   path: ../data/monitor/
-plots:
-  path: ../data/plots/
 evaluation:
   num_episodes: 200

@@ -6,6 +6,8 @@ from replay_memory.replay_memory import ReplayMemory
 
 import logging
 
+MAX_RETRIES = 100
+
 
 class PrioritizedReplayMemory(ReplayMemory):
     def __init__(self, raw_space, state_shape, alpha, epsilon):
@@ -44,9 +46,24 @@ class PrioritizedReplayMemory(ReplayMemory):
         segment_length = total_priority / batch_size
 
         for i in range(batch_size):
-            mass = np.random.uniform(i * segment_length, (i + 1) * segment_length)
-            index = self.tree.find_prefix_sum(mass)
-            indices.append(index)
+            done = False
+            retries = 0
+            while not done and retries < MAX_RETRIES:
+                mass = np.random.uniform(i * segment_length, (i + 1) * segment_length)
+                index = self.tree.find_prefix_sum(mass)
+
+                if index in range(0, len(self.memory)):
+                    indices.append(index)
+                    done = True
+                else:
+                    retries += 1
+
+            if retries == MAX_RETRIES:
+                logging.error(
+                    "Maximum number of retries exceeded for mass in interval (%d, %d).",
+                    i * segment_length,
+                    (i + 1) * segment_length,
+                )
 
         return indices
 

@@ -1,17 +1,21 @@
+import numpy as np
 from ds.sum_tree import SumTree
+
+
+def get_closest_power_of_two(capacity) -> int:
+    power_of_two = 1
+    while power_of_two < capacity:
+        power_of_two *= 2
+
+    return power_of_two
 
 
 def test_sum_tree():
     data = list(range(1, 100))
     capacity = 2 * len(data)
 
-    power_of_two = 1
-    while power_of_two <= capacity:
-        power_of_two *= 2
-
-    st = SumTree(power_of_two)
-
-    assert st.capacity == power_of_two
+    st = SumTree(get_closest_power_of_two(capacity))
+    assert st.capacity == get_closest_power_of_two(capacity)
 
     # set the initial data
     for i, x in enumerate(data):
@@ -58,3 +62,26 @@ def test_sum_tree():
     st[end] = st[end] - 100
     st[0] = st[0] - 100
     assert st.total == previous_total - 200
+
+
+def test_stratified_sampling():
+    def stratified_sample(sum_tree, k):
+        indices = []
+        segment_length = sum_tree.total / k
+
+        for i in range(k):
+            mass = np.random.uniform(i * segment_length, (i + 1) * segment_length)
+            index = sum_tree.find_prefix_sum(mass)
+            indices.append(index)
+
+        return indices
+
+    k = 32
+    st = SumTree(k)
+
+    for i in range(k):
+        st[i] = 1
+
+    samples = stratified_sample(st, k)
+    for i in range(k):
+        assert samples[i] == i

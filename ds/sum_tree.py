@@ -69,6 +69,5 @@ class SumTree:
     def find_prefix_sum(self, prefix_sum):
         """Find an index i in the tree such that the sum up until i - 1 <= prefix_sum.
         """
-        index = self._recursive_prefix_sum(1, prefix_sum) - self.capacity - 1
-        assert 0 <= index < self.capacity
+        index = self._recursive_prefix_sum(1, prefix_sum) - self.capacity
         return index

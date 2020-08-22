@@ -10,14 +10,15 @@ import psutil
 import torch
 
 from deepq.agent import Agent
-from deepq.checkpoint_manager import CheckpointManager
-from deepq.conf_loader import ConfLoader
 from wrappers.wrappers import make_env
+
+from .config_loader import ConfigLoader
+from .checkpoint_manager import CheckpointManager
 
 
 class Trainer:
     def __init__(self, path_to_config):
-        self.conf = ConfLoader(path_to_config).load()
+        self.conf = ConfigLoader(path_to_config).load()
         self._log_cuda_status()
 
         self.env = make_env(self.conf["training"]["gym_id"])

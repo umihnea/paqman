@@ -1,6 +1,4 @@
-import pytest
-
-from deepq.checkpoint_manager import CheckpointManager
+from common.checkpoint_manager import CheckpointManager
 
 
 def test_checkpoint_manager():

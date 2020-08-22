@@ -1,7 +1,7 @@
 import logging
 
 from deepq.agent import Agent
-from deepq.conf_loader import ConfLoader
+from common.config_loader import ConfigLoader
 from wrappers.wrappers import make_env
 
 
@@ -9,7 +9,7 @@ class Evaluator:
     """Contains the evaluation logic for trained agents."""
 
     def __init__(self, path_to_config, path_to_checkpoint):
-        conf = ConfLoader(path_to_config).load()
+        conf = ConfigLoader(path_to_config).load()
         self.num_episodes = int(conf["evaluation"]["num_episodes"])
 
         # Wrap environment in Monitor wrapper

@@ -5,7 +5,7 @@ from typing import Dict
 import yaml
 
 
-class ConfLoader:
+class ConfigLoader:
     """Load and process a yaml configuration file."""
 
     def __init__(self, path):

@@ -142,8 +142,15 @@ class Trainer:
         # Compress data into a .tar.gz archive.
         import shutil
 
+        archive_name = "results_{job_name}_{date}".format(
+            job_name=self.conf["training"]["name"], date=self._now(),
+        )
         shutil.make_archive(
-            "data/results", "gztar", ".", "data", logger=logging.getLogger("zip_data"),
+            f"data/{archive_name}",
+            "gztar",
+            ".",
+            "data",
+            logger=logging.getLogger("zip_data"),
         )
 
         logging.info("Done.")
@@ -154,11 +161,18 @@ class Trainer:
         training process and a base name which describes what the file
         contains."""
         filename = "{base_name}_{name}_{date}.pkl".format(
-            base_name=base_name,
-            name=self.conf["training"]["name"],
-            date=datetime.now().strftime("%d%b_%H-%M-%S"),
+            base_name=base_name, name=self.conf["training"]["name"], date=self._now(),
         )
         path = os.path.join(self.conf["logs"]["path"], filename)
 
         with open(path, "wb") as file:
             pickle.dump(data, file)
+
+    @staticmethod
+    def _now() -> str:
+        """Get the current date, formatted to show a human-readable month.
+
+        This is a utility method to make sure that we use consistent
+        formatting.
+        """
+        return datetime.now().strftime("%d%b_%H-%M-%S")

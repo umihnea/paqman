@@ -1,13 +1,13 @@
 from common.trainer import Trainer
-from .agent import PERAgent
+from .agent import DoubleDQNAgent
 
 
-class PERTrainer(Trainer):
+class DoubleDQNTrainer(Trainer):
     def __init__(self, path_to_config):
         super().__init__(path_to_config)
 
     def _create_agent(self):
-        return PERAgent(
+        return DoubleDQNAgent(
             self.conf["model"],
             action_space=self.env.action_space,
             state_shape=self.env.observation_space.shape,

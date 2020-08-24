@@ -2,6 +2,7 @@ import argparse
 import logging
 
 from common.trainer import Trainer
+from doubledqn.trainer import DoubleDQNTrainer
 from per.trainer import PERTrainer
 
 logging.basicConfig(
@@ -29,7 +30,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.doubledqn:
-        raise NotImplementedError("Double DQN not yet implemented.")
+        trainer = DoubleDQNTrainer(args.filename)
+        trainer.train()
     elif args.per:
         trainer = PERTrainer(args.filename)
         trainer.train()

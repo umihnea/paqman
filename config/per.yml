@@ -2,6 +2,7 @@ training:
   name: per
   gym_id: MsPacmanDeterministic-v0
   num_episodes: 12240
+  forbid_death: true
 model:
   learning_rate: 1e-4
   gamma: 0.99

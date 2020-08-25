@@ -38,6 +38,9 @@ class Trainer:
         self.memory_usage = []
         self.top_score = float("-inf")
 
+        # Flags
+        self.forbid_death = self.conf["training"]["forbid_death"]
+
     def _create_agent(self):
         return Agent(
             self.conf["model"],
@@ -109,16 +112,16 @@ class Trainer:
             action = self.agent.act(observation)
             next_observation, reward, done, info = self.env.step(action)
 
+            if self.forbid_death:
+                # Penalize death and end the episode on first life lost.
+                prev_lives = current_lives
+                current_lives = int(info["ale.lives"])
+                if current_lives < prev_lives:
+                    reward = -100
+                    done = True
+
             score += reward
-
             self.agent.store(observation, action, reward, next_observation, done)
-
-            # No death policy, todo: make this configurable
-            prev_lives = current_lives
-            current_lives = int(info["ale.lives"])
-
-            if current_lives < prev_lives:
-                done = True
 
             if episode >= 0:
                 self.agent.learn()

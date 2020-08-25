@@ -14,11 +14,8 @@ class DoubleDQNAgent(Agent):
         super().__init__(model_parameters, action_space, state_shape)
 
     def learn(self, batch_size: int = 32):
-        """At every step we flip a coin to choose the role of the networks."""
-        if np.random.random() < 0.5:
-            self._learn_using(self.q, self.next_q, batch_size)
-        else:
-            self._learn_using(self.next_q, self.q, batch_size)
+        self._replace_target_network()
+        self._learn_using(self.q, self.next_q, batch_size)
         self.learning_step += 1
 
     def _learn_using(

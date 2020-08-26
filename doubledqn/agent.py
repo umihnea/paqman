@@ -3,7 +3,6 @@ import torch
 from gym.spaces import Discrete
 
 from deepq.agent import Agent
-from deepq.network import DeepQNetwork
 
 
 class DoubleDQNAgent(Agent):
@@ -15,19 +14,12 @@ class DoubleDQNAgent(Agent):
 
     def learn(self, batch_size: int = 32):
         self._replace_target_network()
-        self._learn_using(self.q, self.next_q, batch_size)
-        self.learning_step += 1
 
-    def _learn_using(
-        self, q_one: DeepQNetwork, q_two: DeepQNetwork, batch_size: int = 32
-    ):
-        """Calling this function requires specifying which network will serve
-        as the action-picker and which one is the evaluator.
+        # q_one is the action picker and q_two is the action evaluator.
+        # The action picker is also the network that is updated.
+        q_one = self.q
+        q_two = self.next_q
 
-        :param q_one: this is the network which learns and which picks the actions
-        :param q_two: this is the network which estimates the values of the picked actions
-        :param batch_size: the size of a sampled batch
-        """
         q_one.optimizer.zero_grad()
 
         states, actions, rewards, next_states, dones = self.replay_memory.sample(
@@ -51,3 +43,5 @@ class DoubleDQNAgent(Agent):
         loss = q_one.loss(q_pred, q_target).to(self.device)
         loss.backward()
         q_one.optimizer.step()
+
+        self.learning_step += 1

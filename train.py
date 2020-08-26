@@ -3,6 +3,7 @@ import logging
 
 from common.trainer import Trainer
 from doubledqn.trainer import DoubleDQNTrainer
+from doubleper.trainer import DoublePERTrainer
 from per.trainer import PERTrainer
 
 logging.basicConfig(
@@ -26,9 +27,15 @@ if __name__ == "__main__":
         "--per", action="store_true", help="use prioritized experience replay"
     )
     parser.add_argument("--doubledqn", action="store_true", help="use double DQN")
+    parser.add_argument(
+        "--doubleper", action="store_true", help="use double DQN with PER"
+    )
 
     args = parser.parse_args()
 
+    if args.doubleper or (args.doubledqn and args.per):
+        trainer = DoublePERTrainer(args.filename)
+        trainer.train()
     if args.doubledqn:
         trainer = DoubleDQNTrainer(args.filename)
         trainer.train()

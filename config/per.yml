@@ -21,6 +21,6 @@ checkpoints:
 logs:
   path: ../data/logs/
 monitor:
-  path: ../data/monitor/
+  path: ../data/monitor/per/
 evaluation:
   num_episodes: 200

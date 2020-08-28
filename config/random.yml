@@ -1,5 +1,5 @@
 training:
-  name: doubledqn
+  name: random
   gym_id: MsPacmanDeterministic-v0
   num_episodes: 12240
   forbid_death: true
@@ -12,6 +12,8 @@ model:
   batch_size: 32
   replace_every: 1000
   memory_gb: 3
+  per_alpha: 0.6
+  per_epsilon: 0.01
 checkpoints:
   path: ../data/checkpoints/
   max_size: 5
@@ -19,6 +21,6 @@ checkpoints:
 logs:
   path: ../data/logs/
 monitor:
-  path: ../data/monitor/double-dqn/
+  path: ../data/monitor/random/
 evaluation:
   num_episodes: 200

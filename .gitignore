@@ -142,3 +142,4 @@ cython_debug/
 
 # Data files which change often and are not crucial to the project
 notebooks/scores/*
+notebooks/evaluation_scores/*

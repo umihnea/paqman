@@ -8,7 +8,7 @@ model:
   gamma: 0.99
   epsilon: 1.0
   epsilon_end: 0.05
-  epsilon_decay: 3.8e-4
+  epsilon_decay: 8.62e-5
   batch_size: 32
   replace_every: 1000
   memory_gb: 3
@@ -21,6 +21,6 @@ checkpoints:
 logs:
   path: ../data/logs/
 monitor:
-  path: ../data/monitor/
+  path: ../data/monitor/double-per
 evaluation:
   num_episodes: 200

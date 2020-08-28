@@ -1,10 +1,11 @@
 import argparse
 import logging
+import sys
 
 from common.evaluator import Evaluator
 
 logging.basicConfig(
-    filename="./data/logs/evaluation.log",
+    stream=sys.stdout,
     level=logging.DEBUG,
     format="%(asctime)s %(levelname)s: %(message)s",
 )
@@ -29,8 +30,15 @@ if __name__ == "__main__":
         dest="checkpoint",
         required=True,
     )
+    parser.add_argument(
+        "--random",
+        action="store_true",
+        help="whether to just run a training with a random agent",
+        dest="random",
+    )
 
     args = parser.parse_args()
 
-    evaluator = Evaluator(args.config, args.checkpoint)
+    random = bool(args.random)
+    evaluator = Evaluator(args.config, args.checkpoint, random=random)
     evaluator.evaluate()

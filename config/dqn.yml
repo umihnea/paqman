@@ -19,6 +19,6 @@ checkpoints:
 logs:
   path: ../data/logs/
 monitor:
-  path: ../data/monitor/
+  path: ../data/monitor/vanilla-dqn/
 evaluation:
   num_episodes: 200

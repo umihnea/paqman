@@ -1,4 +1,3 @@
-import torch
 from gym.spaces import Discrete
 import numpy as np
 
@@ -35,7 +34,9 @@ class DoublePERAgent(DoubleDQNAgent):
             self.q, self.next_q, rewards, next_states, dones, batch_size
         )
 
-        error = PERAgent._compute_error(q_target, q_pred)
+        error = PERAgent._compute_error(
+            q_target, q_pred
+        )  # fixme: check if this is computed correctly
         self.replay_memory.batch_update(indices, error)
 
         loss = self.q.loss(q_pred, q_target).to(self.device)

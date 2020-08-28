@@ -66,8 +66,9 @@ class MultiRunData(PlotData):
 
 
 class SingleRunData(PlotData):
-    def __init__(self, data, label, smoothing_window=0):
+    def __init__(self, data, label, smoothing_window=0, color=None):
         super().__init__(np.array(data), label, smoothing_window=smoothing_window)
+        self.color = color
 
     def _make_smoother(self, data):
         if self.smoothing_window == 0:
@@ -77,4 +78,4 @@ class SingleRunData(PlotData):
 
     def plot(self, ax):
         data = self._make_smoother(self.data)
-        ax.plot(data, label=self.label)
+        ax.plot(data, label=self.label, color=self.color)
